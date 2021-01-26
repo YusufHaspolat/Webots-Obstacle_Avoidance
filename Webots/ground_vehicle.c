@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   double left_speed;
   double right_speed;
   double ds_values[3];
+  /* Defining the distance sensors */
   char ds_names[3][10] = {"frnt", "r_corn", "l_corn"};
   for (i = 0; i < 3; i++) {
     ds[i] = wb_robot_get_device(ds_names[i]);
