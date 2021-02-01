@@ -18,22 +18,25 @@ int main(int argc, char **argv) {
   double left_speed;
   double right_speed;
   double ds_values[3];
-  /* Defining the distance sensors */
+  // Defining the distance sensors
   char ds_names[3][10] = {"frnt", "r_corn", "l_corn"};
   for (i = 0; i < 3; i++) {
     ds[i] = wb_robot_get_device(ds_names[i]);
     wb_distance_sensor_enable(ds[i], TIME_STEP);
   }
   WbDeviceTag wheels[4];
+  // Define the wheels
   char wheels_names[4][8] = {"wheel1", "wheel2", "wheel3", "wheel4"};
   for (i = 0; i < 4; i++) {
     wheels[i] = wb_robot_get_device(wheels_names[i]);
     wb_motor_set_position(wheels[i], INFINITY);
   }
   while (wb_robot_step(TIME_STEP) != -1) {
+  	// Give left & right motors the direction and speed
     left_speed = 1.0;
     right_speed = 1.0;
     if(front_flag){
+      // Choose a side to turn against the obstacle ahead
       if (ds_values[2] < ds_values[1]){
         right_flag = 1;
       }
@@ -44,10 +47,13 @@ int main(int argc, char **argv) {
     for (i = 0; i < 3; i++){
       ds_values[i] = wb_distance_sensor_get_value(ds[i]);
     }
+    // An obstacle ahead
     if (ds_values[0] < 650.0){
       front_flag = 1;
     }
+    // Obstacles on both corners -you're stuck-
     else if (ds_values[1] < 450.0 && ds_values[2] < 450.0){
+      // Determine which side to turn
       if(ds_values[2] < ds_values[1]){
         trap_flag_r = 1;
       }
@@ -55,17 +61,21 @@ int main(int argc, char **argv) {
         trap_flag_l = 1;
       }
     }
+    // Obstacle on right corner
     else if (ds_values[1] < 400.0){
       right_corn_flag = 1;
     }
+    // Obstacle on left corner
     else if (ds_values[2] < 400.0){
       left_corn_flag = 1;
     }
     else {
+      // The obstacle ahead is gone
       if (front_flag == 1 && ds_values[0] == 1000.0){
         front_flag = 0;
        }
     }
+    // Turn untill the obstacle is gone "between the lines 78-125"
     if (right_flag){
       left_speed = 1.0;
       right_speed = -1.0;
@@ -114,6 +124,7 @@ int main(int argc, char **argv) {
         trap_flag_l = 0;
       }
     }
+    // Run motors
     wb_motor_set_velocity(wheels[0], left_speed);
     wb_motor_set_velocity(wheels[1], right_speed);
     wb_motor_set_velocity(wheels[2], left_speed);
